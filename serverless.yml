@@ -1,0 +1,86 @@
+
+service: serverless-aws-nodejs-lab
+frameworkVersion: '3'
+plugins: 
+  - serverless-offline
+custom: 
+  serverless-offline:
+    httpPort: 4000
+  settings:
+    database:
+      PRODUCT_DB: 
+        name: products-db
+provider:
+  name: aws
+  memorySize: 256
+  region: us-east-1
+  runtime: nodejs18.x
+  environment: 
+    ENDPOINT_EXTERNAL_PRODUCTS: https://dummyjson.com/products
+    PRODUCT_DB:  ${self:custom.settings.database.PRODUCT_DB.name}
+  iamRoleStatements:
+  - Effect : Allow
+    Action:
+      - dynamodb:Query
+      - dynamodb:PutItem
+    Resource:
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.database.PRODUCT_DB.name}/index/*"
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.settings.database.PRODUCT_DB.name}"
+
+
+
+functions:
+  listExternalProducts:
+    handler: src/functions/products/v1/listProducts/app.handler
+    name: listExternalProducts
+    events:
+      - http:
+          path: v1/products
+          method: get
+          integration: lambda
+          cors: true
+  createProduct: 
+    handler: src/functions/products/v1/createProduct/app.handler
+    name: createProduct
+    events:
+      - http:
+          path: v1/products
+          method: post
+          authorizer : aws_iam
+          integration: lambda
+          cors: true
+  listProducts: 
+    handler: src/functions/products/v2/listProducts/app.handler
+    name: listProducts
+    events:
+      - http:
+          path: v2/products
+          method: get
+          integration: lambda
+          cors: true
+
+resources: 
+  Resources: 
+    ProductsDB: 
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.settings.database.PRODUCT_DB.name}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: status
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes: 
+          - IndexName : status-products-index
+            KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+        Tags:
+          - Key: Name
+            Value: TablaProductos
