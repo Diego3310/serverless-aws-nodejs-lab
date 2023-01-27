@@ -1,0 +1,28 @@
+{
+  "name": "serverless-aws-nodejs-lab",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "dev": "sls offline"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Diego3310/serverless-aws-nodejs-lab.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Diego3310/serverless-aws-nodejs-lab/issues"
+  },
+  "homepage": "https://github.com/Diego3310/serverless-aws-nodejs-lab#readme",
+  "dependencies": {
+    "aws-sdk": "^2.1303.0",
+    "axios": "^1.2.5",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "serverless-offline": "^12.0.4"
+  }
+}
